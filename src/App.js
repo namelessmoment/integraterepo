@@ -44,8 +44,6 @@ function App() {
         <Route path="/show-bids" element={<ShowBids />} />
         <Route path="/completed-projects" element={<CompletedProjects />} /> 
         <Route path="/contracts" element={<Contracts />} />
-
-
     </Routes>
     </div>
   );

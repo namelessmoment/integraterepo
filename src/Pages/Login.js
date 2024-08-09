@@ -26,6 +26,7 @@ export default function Login() {
           const data = await response.json();
           console.log("Login successful:", data);
           // Save the response in session storage
+          // console.log(sessionStorage);
           sessionStorage.setItem("freelancerData", JSON.stringify(data));
           navigate("/freelancer");
         } else {

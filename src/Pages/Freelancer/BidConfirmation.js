@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import '../../styles/freelancer/BidCinfirmation.css';
 
 const BidConfirmation = () => {
@@ -9,6 +9,7 @@ const BidConfirmation = () => {
   const [bidAmount, setBidAmount] = useState('');
   const [skills, setSkills] = useState('');
   const [specialRequirements, setSpecialRequirements] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (project) {
@@ -18,8 +19,17 @@ const BidConfirmation = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle the bid submission logic here
-    console.log('Bid submitted:', { bidAmount, skills, specialRequirements });
+    
+    const bidData = { bidAmount, skills, specialRequirements, project };
+    console.log('Bid submitted:', bidData);
+
+    // Save the bid data into session storage
+    let bids = JSON.parse(sessionStorage.getItem('bids')) || [];
+    bids.push(bidData);
+    sessionStorage.setItem('bids', JSON.stringify(bids));
+
+    // Redirect to the showBids page
+    navigate('/show-bids');
   };
 
   return (
