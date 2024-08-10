@@ -1,62 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
 import "../styles/Login.css";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const [username, setUsername] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [role, setRole] = React.useState("client"); // Default to client
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("client"); // Default to client
+  const [errorMessage, setErrorMessage] = useState(""); // State to track error messages
   const navigate = useNavigate();
 
   async function loginFunc(e) {
     e.preventDefault(); // Prevent form from submitting the default way
     console.log("Login button clicked");
 
-    if (role === "freelancer") {
-      try {
-        const response = await fetch("http://localhost:8080/freelancers/freelancerLogin", { // Adjust the URL based on your backend setup
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email: username, password }), // Use 'email' instead of 'username' to match API
-        });
+    const url = role === "freelancer" 
+      ? "http://localhost:8080/freelancers/freelancerLogin" 
+      : "http://localhost:8080/users/userLogin";
 
-        if (response.ok) {
-          const data = await response.json();
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: username, password }), // Use 'email' instead of 'username' to match API
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data) {
           console.log("Login successful:", data);
           // Save the response in session storage
-          sessionStorage.setItem("freelancerData", JSON.stringify(data));
-          navigate("/freelancer");
+          const storageKey = role === "freelancer" ? "freelancerData" : "clientData";
+          sessionStorage.setItem(storageKey, JSON.stringify(data));
+          navigate(role === "freelancer" ? "/freelancer" : "/clientpage");
         } else {
-          console.log("Invalid credentials");
+          setErrorMessage("Invalid user or password"); // Set error message for null data
         }
-      } catch (error) {
-        console.error("Error:", error);
+      } else {
+        setErrorMessage("Invalid user or password"); // Set error message for non-OK response
       }
-    } else {
-      // Static login data for client (or you can implement similar API call for client login)
-      try {
-        const response = await fetch("http://localhost:8080/users/userLogin", { // Adjust the URL based on your backend setup
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email: username, password }), // Use 'email' instead of 'username' to match API
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Login successful:", data);
-          // Save the response in session storage
-          sessionStorage.setItem("clientData", JSON.stringify(data));
-          navigate("/clientpage");
-        } else {
-          console.log("Invalid credentials");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-      }
+    } catch (error) {
+      console.error("Error:", error);
+      setErrorMessage("An error occurred during login. Please try again."); // Set error message for catch block
     }
   }
 
@@ -107,9 +93,13 @@ export default function Login() {
 
             <button type="submit">Login</button>
           </form>
+          {errorMessage && <div className="error-message">{errorMessage}</div>} {/* Display error message */}
           <div className="footer">
             <p>
-              Don't have an account? <a href="/signup">Sign up</a>
+              Don't have an account?{" "}
+              <a href={role === "freelancer" ? "/registerfreelancer" : "/signup"}>
+                Sign up
+              </a>
             </p>
           </div>
         </div>

@@ -1,116 +1,222 @@
-import { useState } from "react";
-import "../../styles/client/clientpage.css"
+import React, { useState, useEffect } from "react";
+import "../../styles/client/clientpage.css";
 import Navigation from "../../components/Navigation";
+import axios from "axios";
 
 export default function ClientProfile() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    oldPassword: '', // Field for old password
+    newPassword: '', // Field for new password
+    confirmPassword: '', // Field for confirm password
+  });
 
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        phone: '',
+  const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  // Fetch user data from session storage
+  const user = JSON.parse(sessionStorage.getItem('clientData')) || JSON.parse(sessionStorage.getItem('freelancerData'));
+  const userId = user ? user.id : null;
+
+  // Prefill the form fields with session data on component mount
+  useEffect(() => {
+    if (userId) {
+      setFormData({
+        name: user.userName, // Adjust the key if necessary
+        email: user.email,
+        phone: user.mobileNumber, // Adjust the key if necessary
+        oldPassword: '',  // Initialize with an empty string
+        newPassword: '',  // Initialize with an empty string
+        confirmPassword: '',  // Initialize with an empty string
       });
-    
-      const [errors, setErrors] = useState({});
-    
-      // Handle input change
-      const handleChange = (e) => {
-        setFormData({
-          ...formData,
-          [e.target.name]: e.target.value,
+    }
+  }, [userId]);
+
+  // Handle input change
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // Basic validation
+  const validate = () => {
+    let tempErrors = {};
+    let isValid = true;
+
+    if (!formData.name) {
+      tempErrors.name = 'Name is required';
+      isValid = false;
+    }
+
+    if (!formData.email) {
+      tempErrors.email = 'Email is required';
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      tempErrors.email = 'Email is invalid';
+      isValid = false;
+    }
+
+    if (!formData.phone) {
+      tempErrors.phone = 'Phone number is required';
+      isValid = false;
+    } else if (!/^\d{10}$/.test(formData.phone)) {
+      tempErrors.phone = 'Phone number is invalid';
+      isValid = false;
+    }
+
+    if (!formData.oldPassword) {
+      tempErrors.oldPassword = 'Old password is required';
+      isValid = false;
+    }
+
+    if (!formData.newPassword) {
+      tempErrors.newPassword = 'New password is required';
+      isValid = false;
+    } else if (formData.newPassword === formData.oldPassword) {
+      tempErrors.newPassword = 'New password cannot be the same as the old password';
+      isValid = false;
+    }
+
+    if (!formData.confirmPassword) {
+      tempErrors.confirmPassword = 'Confirm password is required';
+      isValid = false;
+    } else if (formData.newPassword !== formData.confirmPassword) {
+      tempErrors.confirmPassword = 'Passwords do not match';
+      isValid = false;
+    }
+
+    setErrors(tempErrors);
+    return isValid;
+  };
+
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (validate()) {
+      // Prepare the data to be sent to the backend server
+      const updateData = {
+        userName: formData.name,
+        email: formData.email,
+        mobileNumber: formData.phone,
+        password: formData.newPassword || user.password, // Use new password or old password if not changing
+      };
+
+      axios.put(`http://localhost:8080/users/${userId}`, updateData)
+        .then(response => {
+          if (response.status === 200) { // Check if the response status is OK
+            console.log('Profile updated successfully:', response.data);
+            setSuccessMessage('Profile updated successfully!');
+            setErrorMessage('');
+            // Optionally, clear the success message after some time
+            setTimeout(() => setSuccessMessage(''), 3000);
+          } else {
+            console.error('Unexpected response status:', response.status);
+            setErrorMessage('Failed to update profile.');
+          }
+        })
+        .catch(error => {
+          console.error('Error updating profile:', error);
+          setErrorMessage('Failed to update profile.');
         });
-      };
-    
-      // Basic validation
-      const validate = () => {
-        let tempErrors = {};
-        let isValid = true;
-    
-        if (!formData.name) {
-          tempErrors.name = 'Name is required';
-          isValid = false;
-        }
-    
-        if (!formData.email) {
-          tempErrors.email = 'Email is required';
-          isValid = false;
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-          tempErrors.email = 'Email is invalid';
-          isValid = false;
-        }
-    
-        if (!formData.phone) {
-          tempErrors.phone = 'Phone number is required';
-          isValid = false;
-        } else if (!/^\d{10}$/.test(formData.phone)) {
-          tempErrors.phone = 'Phone number is invalid';
-          isValid = false;
-        }
-    
-        setErrors(tempErrors);
-        return isValid;
-      };
-    
-      // Handle form submission
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        if (validate()) {
-          // Here, you can send the data to the backend server to update the client details
-          console.log('Form data submitted:', formData);
-          alert('Profile updated successfully!');
-          // Reset the form if necessary
-          setFormData({ name: '', email: '', phone: '' });
-        }
-      };
+    }
+  };
+
   return (
-     <div>
-     <Navigation/>
-    <div className="clientprofile">
-      <h2>Update Profile</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="name">Name:</label>
-          <input
-            type="text"
-            className="form-control"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-          />
-          {errors.name && <p className="text-danger">{errors.name}</p>}
-        </div>
+    <div>
+      <Navigation />
+      <div className="clientprofile">
+        <h2>Update Profile</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="name">Name:</label>
+            <input
+              type="text"
+              className="form-control"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+            />
+            {errors.name && <p className="text-danger">{errors.name}</p>}
+          </div>
 
-        <div className="form-group">
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            className="form-control"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-          />
-          {errors.email && <p className="text-danger">{errors.email}</p>}
-        </div>
+          <div className="form-group">
+            <label htmlFor="email">Email:</label>
+            <input
+              type="email"
+              className="form-control"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+            />
+            {errors.email && <p className="text-danger">{errors.email}</p>}
+          </div>
 
-        <div className="form-group">
-          <label htmlFor="phone">Phone Number:</label>
-          <input
-            type="tel"
-            className="form-control"
-            id="phone"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-          />
-          {errors.phone && <p className="text-danger">{errors.phone}</p>}
-        </div>
+          <div className="form-group">
+            <label htmlFor="phone">Phone Number:</label>
+            <input
+              type="tel"
+              className="form-control"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+            />
+            {errors.phone && <p className="text-danger">{errors.phone}</p>}
+          </div>
 
-        <button type="submit" className="btn btn-primary">
-          Update
-        </button>
-      </form>
-    </div>
+          <div className="form-group">
+            <label htmlFor="oldPassword">Old Password:</label>
+            <input
+              type="password"
+              className="form-control"
+              id="oldPassword"
+              name="oldPassword"
+              value={formData.oldPassword}
+              onChange={handleChange}
+            />
+            {errors.oldPassword && <p className="text-danger">{errors.oldPassword}</p>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="newPassword">New Password:</label>
+            <input
+              type="password"
+              className="form-control"
+              id="newPassword"
+              name="newPassword"
+              value={formData.newPassword}
+              onChange={handleChange}
+            />
+            {errors.newPassword && <p className="text-danger">{errors.newPassword}</p>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="confirmPassword">Confirm Password:</label>
+            <input
+              type="password"
+              className="form-control"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
+            {errors.confirmPassword && <p className="text-danger">{errors.confirmPassword}</p>}
+          </div>
+
+          <button type="submit" className="btn btn-primary">
+            Update
+          </button>
+        </form>
+        {successMessage && <p className="text-success">{successMessage}</p>}
+        {errorMessage && <p className="text-danger">{errorMessage}</p>}
+      </div>
     </div>
   );
 }

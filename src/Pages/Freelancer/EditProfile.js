@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect ,useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/freelancer/EditProfile.css';
+import axios from 'axios';
+
 
 const EditProfile = () => {
   const [profilePicture, setProfilePicture] = useState(null); // No default image, use CSS for default logo
@@ -11,8 +13,28 @@ const EditProfile = () => {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [freelancer ,setFreelancer] = useState(null);
 
   const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   loadFreelancer();
+  // }, []);
+
+  // const loadFreelancer = async () => {
+  //   try {
+  //     const result = await axios.get("http://localhost:8080/freelancers/3");
+  //     setFreelancer(result.data);
+  //     setEmail(result.data.email);
+  //     setContactNo(result.data.contactNo);
+  //     setOldPassword(result.data.oldPassword);
+  //     // setProfilePicture(result.data.profilePicture || 'default-profile-pic.jpg'); // Assuming the profile picture is part of the freelancer data
+  //     console.log(result.data);
+  //   } catch (error) {
+  //     console.error("Error fetching freelancer data", error);
+  //   }
+  // };
+
 
   const handleProfilePictureChange = (e) => {
     // Simulate changing profile picture

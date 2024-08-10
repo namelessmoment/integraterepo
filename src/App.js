@@ -1,6 +1,6 @@
-
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Login from './Pages/Login';
-import { Route,Routes } from 'react-router-dom';
 import Signup from './Pages/Signup';
 import Home from './Pages/Home';
 import ClientPage from './Pages/Client/Client';
@@ -18,35 +18,32 @@ import ContractDetails from './Pages/Client/Contract';
 import PostProjectQuery from './Pages/Client/PostProject';
 import CompletedProjects from './Pages/Freelancer/CompletedProjects';
 import Contracts from './Pages/Freelancer/Contracts';
-
+import ProtectedRoute from './components/ProtectedRoute'; // Import ProtectedRoute
 
 function App() {
   return (
     <div className="App">
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path='/loggedin' element={<h1>hello</h1>}/>
-      <Route path='/signup' element={<Signup/>}/>
-      <Route path='/' element={<Home/>}/>
-      <Route path='/clientpage' element={<ClientPage/>}/>
-      <Route path='/registerfreelancer' element={<RegisterFreelancer/>}/>
-      <Route path='/FreelancerProfile' element={<FreelancerProfile/>}/>
-      <Route path='/Projects' element={<Projects/>}/>
-      <Route path='/ClientProfile' element={<ClientProfile/>}/>
-      <Route path='/Projects/Bids' element ={<BidList/>}/>
-      <Route path='/Contract' element={<ContractDetails/>}/>
-      <Route path='/Projects/PostProject' element={<PostProjectQuery/>}/>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/clientpage" element={<ClientPage />} />
+        <Route path="/registerfreelancer" element={<RegisterFreelancer />} />
+        <Route path="/freelancer-profile" element={<FreelancerProfile />} />
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/client-profile" element={<ClientProfile />} />
+        <Route path="/projects/bids" element={<BidList />} />
+        <Route path="/contract" element={<ContractDetails />} />
+        <Route path="/post-project" element={<PostProjectQuery />} />
 
-      <Route path="/freelancer" element={<Freelancer />} />
-        <Route path="/bid-confirmation" element={<BidConfirmation />} />
-        <Route path="/my-projects" element={< MyProjects/>} />
-        <Route path="/edit-profile" element={<EditProfile />} />
-        <Route path="/show-bids" element={<ShowBids />} />
-        <Route path="/completed-projects" element={<CompletedProjects />} /> 
-        <Route path="/contracts" element={<Contracts />} />
-
-
-    </Routes>
+        <Route path="/freelancer" element={<ProtectedRoute element={Freelancer} />} />
+        <Route path="/bid-confirmation" element={<ProtectedRoute element={BidConfirmation} />} />
+        <Route path="/my-projects" element={<ProtectedRoute element={MyProjects} />} />
+        <Route path="/edit-profile" element={<ProtectedRoute element={EditProfile} />} />
+        <Route path="/show-bids" element={<ProtectedRoute element={ShowBids} />} />
+        <Route path="/completed-projects" element={<ProtectedRoute element={CompletedProjects} />} />
+        <Route path="/contracts" element={<ProtectedRoute element={Contracts} />} />
+      </Routes>
     </div>
   );
 }

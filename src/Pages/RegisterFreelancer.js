@@ -1,14 +1,19 @@
-import { useState,useEffect } from "react";
-import axios, { Axios } from "axios";
+import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 export default function RegisterFreelancer()
 {
     const [formData, setFormData] = useState({
-        username: '',
+      freelancerName: '',
         email: '',
         password: '',
-        skills: ''
+        skills: '',
+        mobileNumber:'',
+        profileDescription:''
       });
     
+      const navigate = useNavigate();
+
       const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -17,31 +22,59 @@ export default function RegisterFreelancer()
         });
       };
     
-      const handleSubmit = (e) => {
+      const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validate mobile number
+        if (formData.mobileNumber.length !== 10 || !/^\d+$/.test(formData.mobileNumber)) {
+          alert("Mobile number must be exactly 10 digits.");
+          return;
+        }
+        const registrationData = {
+          freelancerName: formData.freelancerName,
+          email: formData.email,
+          password: formData.password,
+          skills: formData.skills,
+          mobileNumber: formData.mobileNumber,
+          profileDescription: formData.profileDescription
+        };
         // Submit form data to the server
         // You can replace the below log with an API call to your backend
-        axios.post("http://localhost:3000/employee",{formData}).then(
-            (response) => {
-                console.log(response.data);
-            }
-            ).catch((error) => {
-                console.error(error);
-            }
-        )
-        console.log('Form submitted:', formData);
+        try {
+          const response = await axios.post("http://localhost:8080/freelancers", registrationData);
+          console.log(response.data);
+          alert("Freelancer Registered Successfully!!!");
+          navigate("/login");
+      } catch (error) {
+          if (error.response) {
+              // Handle specific error codes or messages
+              const errorMessage = error.response.data.message || "An error occurred.";
+              if (errorMessage.includes("Email Already Exists!")) {
+                  alert("The email is already registered. Please use a different email.");
+              }
+              else if((errorMessage.includes("Query did not return a unique result:"))){
+                alert("The mobile number is already registered. Please use a different mobile number.");
+              }
+               else {
+                  alert(errorMessage);
+              }
+          } else {
+              console.error(error);
+              alert("An unexpected error occurred. Please try again.");
+          }
+      }
       };
     return (
         <div>
         <h1>Register as a Freelancer</h1>
         <form onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="username">Username:</label><br />
+            <label htmlFor="freelancerName">Username:</label><br />
             <input
               type="text"
               id="username"
-              name="username"
-              value={formData.username}
+              name="freelancerName"
+              value={formData.freelancerName}
               onChange={handleChange}
               required
             />
@@ -83,6 +116,28 @@ export default function RegisterFreelancer()
             />
           </div>
           <br />
+          <div>
+            <label htmlFor="mobileNumber">Mobile Number:</label><br />
+            <input
+              id="mobileNo"
+              name="mobileNumber"
+              value={formData.mobileNumber}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <br />
+          <div>
+            <label htmlFor="profileDescription">Profile Description:</label><br />
+            <textarea
+              id="profileDescription"
+              name="profileDescription"
+              value={formData.profileDescription}
+              onChange={handleChange}
+              rows="4"
+              cols="50"
+          />
+          </div>
           <button type="submit">Register</button>
         </form>
       </div>

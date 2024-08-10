@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../styles/client/projectform.css';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const PostProjectQuery = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +13,10 @@ const PostProjectQuery = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
+
+  // Fetch user data from session storage
+  const user = JSON.parse(sessionStorage.getItem('clientData')) || JSON.parse(sessionStorage.getItem('freelancerData'));
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,7 +24,7 @@ const PostProjectQuery = () => {
       ...formData,
       [name]: value,
     });
-  };                              
+  };
 
   const validate = () => {
     let tempErrors = {};
@@ -32,9 +38,38 @@ const PostProjectQuery = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     if (validate()) {
-      alert('Project Query Submitted Successfully!');
-      // Add logic to handle form submission (e.g., API call)
+      // Prepare data to be sent to the API
+      const projectData = {
+        title: formData.projectTitle,
+        projType: formData.projectType,
+        description: formData.description,
+        status: 'PENDING',
+        budget: parseFloat(formData.budget),
+        user: {
+          userName: user.userName,
+          email: user.email,
+          mobileNumber: user.mobileNumber,
+        },
+      };
+
+      // Send POST request to add the project
+      axios.post('http://localhost:8080/projects/postProject', projectData)
+        .then(response => {
+          if (response.status === 200) {
+            console.log('Project posted successfully:', response.data);
+            // Navigate to the project page upon success
+            navigate('/project');
+          } else {
+            console.error('Unexpected response status:', response.status);
+            alert('Failed to post project.');
+          }
+        })
+        .catch(error => {
+          console.error('Error posting project:', error);
+          alert('Failed to post project.');
+        });
     } else {
       alert('Please fill out all required fields.');
     }
