@@ -31,9 +31,15 @@ export default function Login() {
         if (data) {
           console.log("Login successful:", data);
           // Save the response in session storage
+<<<<<<< HEAD
           const storageKey = role === "freelancer" ? "freelancerData" : "clientData";
           sessionStorage.setItem(storageKey, JSON.stringify(data));
           navigate(role === "freelancer" ? "/freelancer" : "/clientpage");
+=======
+          // console.log(sessionStorage);
+          sessionStorage.setItem("freelancerData", JSON.stringify(data));
+          navigate("/freelancer");
+>>>>>>> f36991980bfaaa1267c80c97dff934f3ce947d3a
         } else {
           setErrorMessage("Invalid user or password"); // Set error message for null data
         }

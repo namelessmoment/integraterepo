@@ -36,6 +36,7 @@ function App() {
         <Route path="/contract" element={<ContractDetails />} />
         <Route path="/post-project" element={<PostProjectQuery />} />
 
+<<<<<<< HEAD
         <Route path="/freelancer" element={<ProtectedRoute element={Freelancer} />} />
         <Route path="/bid-confirmation" element={<ProtectedRoute element={BidConfirmation} />} />
         <Route path="/my-projects" element={<ProtectedRoute element={MyProjects} />} />
@@ -44,6 +45,16 @@ function App() {
         <Route path="/completed-projects" element={<ProtectedRoute element={CompletedProjects} />} />
         <Route path="/contracts" element={<ProtectedRoute element={Contracts} />} />
       </Routes>
+=======
+      <Route path="/freelancer" element={<Freelancer />} />
+        <Route path="/bid-confirmation" element={<BidConfirmation />} />
+        <Route path="/my-projects" element={< MyProjects/>} />
+        <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/show-bids" element={<ShowBids />} />
+        <Route path="/completed-projects" element={<CompletedProjects />} /> 
+        <Route path="/contracts" element={<Contracts />} />
+    </Routes>
+>>>>>>> f36991980bfaaa1267c80c97dff934f3ce947d3a
     </div>
   );
 }
